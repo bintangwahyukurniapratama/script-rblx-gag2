@@ -1,156 +1,149 @@
 -- ====================================================================
--- KYRIEL HUB - GROW A GARDEN 2 (CLEAN & SAFE VERSION)
+-- KYRIEL HUB v3.0 - GROW A GARDEN 2 (NATIVE MOBILE UI EDITION)
 -- Slogan: I just give the tools, whether they're used right or not is your business, boss.
 -- ====================================================================
 
--- 1. MEMUAT LIBRARY UI (Menggunakan Orion Library yang sangat bersahabat dengan Delta Mobile)
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+-- Mencegah duplikasi menu jika skrip dijalankan ulang
+if game.CoreGui:FindFirstChild("KyrielHubGAG2") then
+    game.CoreGui.KyrielHubGAG2:Destroy()
+end
 
--- 2. MEMBUAT WINDOW UTAMA
-local Window = OrionLib:MakeWindow({
-    Name = "Kyriel Hub | Grow a Garden 2", 
-    HidePremium = true, 
-    SaveConfig = false, 
-    ConfigFolder = "KyrielConfig"
-})
+-- 1. PEMBUATAN INTERFACE UI ASLI ROBLOX (NATIVE SCREEN_GUI)
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+local SloganLabel = Instance.new("TextLabel")
+local UIListLayout = Instance.new("UIListLayout")
 
--- 3. NEGARA VARIABLE GLOBAL (Untuk Status On/Off Fitur)
+ScreenGui.Name = "KyrielHubGAG2"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+
+-- Bingkai Utama Menu (Bisa digeser di layar HP)
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 240, 0, 280)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(255, 50, 50)
+
+-- Judul Menu
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TitleLabel.Size = UDim2.new(1, 0, 0, 35)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "KYRIEL HUB | GAG 2"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 18
+
+-- Slogan Kecil di Bawah Judul
+SloganLabel.Name = "SloganLabel"
+SloganLabel.Parent = MainFrame
+SloganLabel.BackgroundTransparency = 1
+SloganLabel.Position = UDim2.new(0, 0, 0, 35)
+SloganLabel.Size = UDim2.new(1, 0, 0, 15)
+SloganLabel.Font = Enum.Font.SourceSansItalic
+SloganLabel.Text = "I just give the tools..."
+SloganLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+SloganLabel.TextSize = 11
+
+-- Wadah Tombol-Tombol Saklar
+local ButtonContainer = Instance.new("Frame")
+ButtonContainer.Name = "ButtonContainer"
+ButtonContainer.Parent = MainFrame
+ButtonContainer.BackgroundTransparency = 1
+ButtonContainer.Position = UDim2.new(0, 10, 0, 55)
+ButtonContainer.Size = UDim2.new(1, -20, 1, -65)
+
+UIListLayout.Parent = ButtonContainer
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 8)
+
+-- 2. NEGARA VARIABLE KONTROL
 _G.AutoHarvest = false
 _G.StealNight = false
 _G.GoldSeed = false
 _G.RainbowSeed = false
-_G.BypassDistance = false -- Fitur ambil jarak jauh
-_G.WalkSpeed = 16
-_G.JumpPower = 50
-_G.InfJump = false
+_G.BypassDistance = false
 
--- 4. MEMBUAT TAB-TAB MENU
-local FarmTab = Window:MakeTab({
-    Name = "Auto Farm",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-local PlayerTab = Window:MakeTab({
-    Name = "Player",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
--- 5. MENAMBAHKAN ELEMEN TAB: AUTO FARM
-FarmTab:AddSection({
-    Name = "Mekanisme Panen"
-})
-
-FarmTab:AddToggle({
-    Name = "Auto Harvest (Kebun Sendiri)",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoHarvest = Value
-    end    
-})
-
-FarmTab:AddToggle({
-    Name = "Auto Steal Night (Curi Kebun Lain)",
-    Default = false,
-    Callback = function(Value)
-        _G.StealNight = Value
-    end    
-})
-
-FarmTab:AddSection({
-    Name = "Prioritas Event Spesial"
-})
-
-FarmTab:AddToggle({
-    Name = "Auto Ambil Gold Seed",
-    Default = false,
-    Callback = function(Value)
-        _G.GoldSeed = Value
-    end    
-})
-
-FarmTab:AddToggle({
-    Name = "Auto Ambil Rainbow Seed",
-    Default = false,
-    Callback = function(Value)
-        _G.RainbowSeed = Value
-    end    
-})
-
-FarmTab:AddSection({
-    Name = "Modifikasi Jangkauan"
-})
-
-FarmTab:AddToggle({
-    Name = "Bypass Batasan Jarak",
-    Default = false,
-    Callback = function(Value)
-        _G.BypassDistance = Value
-    end    
-})
-
--- 6. MENAMBAHKAN ELEMEN TAB: PLAYER (WALKSPEED & JUMPPOWER)
-PlayerTab:AddSection({
-    Name = "Statistik Karakter"
-})
-
-PlayerTab:AddSlider({
-    Name = "Kecepatan Jalan (WalkSpeed)",
-    Min = 16,
-    Max = 150,
-    Default = 16,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 1,
-    ValueName = "Speed",
-    Callback = function(Value)
-        _G.WalkSpeed = Value
-        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+-- 3. FUNGSI UNTUK MEMBUAT TOMBOL SAKLAR KUSTOM (TOGGLE BUTTON)
+local function createToggle(name, callback)
+    local Button = Instance.new("TextButton")
+    Button.Name = name .. "Btn"
+    Button.Parent = ButtonContainer
+    Button.Size = UDim2.new(1, 0, 0, 32)
+    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    Button.Font = Enum.Font.SourceSansSemibold
+    Button.Text = name .. " : OFF"
+    Button.TextColor3 = Color3.fromRGB(255, 100, 100)
+    Button.TextSize = 14
+    Button.BorderSizePixel = 0
+    
+    local active = false
+    Button.MouseButton1Click:Connect(function()
+        active = not active
+        if active then
+            Button.BackgroundColor3 = Color3.fromRGB(35, 100, 35)
+            Button.TextColor3 = Color3.fromRGB(100, 255, 100)
+            Button.Text = name .. " : ON"
+        else
+            Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            Button.TextColor3 = Color3.fromRGB(255, 100, 100)
+            Button.Text = name .. " : OFF"
         end
-    end    
-})
+        callback(active)
+    end)
+end
 
-PlayerTab:AddSlider({
-    Name = "Tinggi Lompatan (JumpPower)",
-    Min = 50,
-    Max = 300,
-    Default = 50,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 1,
-    ValueName = "Power",
-    Callback = function(Value)
-        _G.JumpPower = Value
-        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-            game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
-        end
-    end    
-})
+-- 4. MENYUNTIKKAN TOMBOL KE MENU VISUAL
+createToggle("Auto Harvest (Milik Sendiri)", function(state) _G.AutoHarvest = state end)
+createToggle("Auto Steal Night (Nyolong)", function(state) _G.StealNight = state end)
+createToggle("Prioritas Gold Seed", function(state) _G.GoldSeed = state end)
+createToggle("Prioritas Rainbow Seed", function(state) _G.RainbowSeed = state end)
+createToggle("Bypass Batasan Jarak", function(state) _G.BypassDistance = state end)
 
-PlayerTab:AddToggle({
-    Name = "Lompatan Tanpa Batas (Inf Jump)",
-    Default = false,
-    Callback = function(Value)
-        _G.InfJump = Value
-    end    
-})
+-- Tombol Minimize Menu (Biar gak menonjol di layar HP)
+local MinBtn = Instance.new("TextButton")
+MinBtn.Parent = MainFrame
+MinBtn.Size = UDim2.new(0, 30, 0, 30)
+MinBtn.Position = UDim2.new(1, -32, 0, 2)
+MinBtn.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.TextSize = 16
+local minimized = false
+MinBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        ButtonContainer.Visible = false
+        MainFrame.Size = UDim2.new(0, 240, 0, 35)
+        MinBtn.Text = "+"
+    else
+        ButtonContainer.Visible = true
+        MainFrame.Size = UDim2.new(0, 240, 0, 280)
+        MinBtn.Text = "-"
+    end
+end)
 
--- 7. FUNGSI EKSEKUSI TOMBOL PANEN GAME (PROXIMITY PROMPT)
-local function triggerHarvest(prompt)
+-- 5. FUNGSI UTAMA PEMICU PANEN GAME
+local function triggerPrompt(prompt)
     if fireproximityprompt then
         fireproximityprompt(prompt)
     else
-        -- Cara alternatif jika eksekutor tidak mendukung bypass native
         prompt:InputHoldBegin()
         task.wait(prompt.HoldDuration)
         prompt:InputHoldEnd()
     end
 end
 
--- 8. THREAD UTAMA UNTUK AUTO-FARMING (BACKGROUND WORKER)
+-- 6. ENGINE PENGGERAK FUNGSI (BACKGROUND THREAD)
 task.spawn(function()
     while true do
-        task.wait(0.1) -- Menjaga HP/Emulator tidak overheat
+        task.wait(0.1)
         
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
@@ -165,7 +158,6 @@ task.spawn(function()
                     local objectText = obj.ObjectText:lower()
                     local actionText = obj.ActionText:lower()
                     
-                    -- Pengecekan Jarak jika fitur bypass dimatikan
                     local inRange = true
                     if not _G.BypassDistance then
                         local distance = (hrp.Position - obj.Parent.Position).Magnitude
@@ -175,27 +167,27 @@ task.spawn(function()
                     end
                     
                     if inRange then
-                        -- [A] EVENT RAINBOW SEED
+                        -- Ambil Rainbow Seed
                         if _G.RainbowSeed and (string.find(parentName, "rainbow") or string.find(objectText, "rainbow") or string.find(actionText, "rainbow")) then
-                            triggerHarvest(obj)
+                            triggerPrompt(obj)
                             continue
                         end
 
-                        -- [B] EVENT GOLD SEED
+                        -- Ambil Gold Seed
                         if _G.GoldSeed and (string.find(parentName, "gold") or string.find(objectText, "gold") or string.find(actionText, "gold")) then
-                            triggerHarvest(obj)
+                            triggerPrompt(obj)
                             continue
                         end
 
-                        -- [C] EVENT STEAL NIGHT
+                        -- Curi saat Steal Night
                         if _G.StealNight and (string.find(actionText, "steal") or string.find(objectText, "steal")) then
-                            triggerHarvest(obj)
+                            triggerPrompt(obj)
                             continue
                         end
                         
-                        -- [D] PANEN NORMAL
+                        -- Panen Normal kebun sendiri
                         if _G.AutoHarvest and (string.find(actionText, "harvest") or string.find(actionText, "collect")) then
-                            triggerHarvest(obj)
+                            triggerPrompt(obj)
                         end
                     end
 
@@ -205,30 +197,4 @@ task.spawn(function()
     end
 end)
 
--- 9. THREAD UNTUK LOOP PLAYER (WALKSPEED & INFINITE JUMP)
-task.spawn(function()
-    -- Cek Infinite Jump
-    game:GetService("UserInputService").JumpRequest:Connect(function()
-        if _G.InfJump and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-            game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-        end
-    end)
-    
-    -- Jaga agar WalkSpeed & JumpPower tidak reset saat karakter mati/respawn
-    game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
-        local hum = char:WaitForChild("Humanoid")
-        task.wait(1)
-        hum.WalkSpeed = _G.WalkSpeed
-        hum.JumpPower = _G.JumpPower
-    end)
-end)
-
--- 10. NOTIFIKASI SUKSES AKTIF
-OrionLib:MakeNotification({
-    Name = "Kyriel Hub Aktif!",
-    Content = "Gak pake key, gak pake iklan. Nikmatin gamenya, Bos!",
-    Image = "rbxassetid://4483345998",
-    Time = 6
-})
-
-OrionLib:Init()
+print("[Kyriel Hub] Native UI successfully loaded, Boss!")
